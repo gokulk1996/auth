@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<p th:text="'Dear ' + ${email}"></p>
+<p>Please click on the URL below to register your account:</p>
+<p><a th:href="@{|${baseUrl}/register/${token}|}"
+      th:text="@{|${baseUrl}/register/${token}|}"></a></p>
+<p>Regards,<br />Budderfly</p>
+</body>
+</html>

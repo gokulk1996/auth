@@ -1,0 +1,28 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+			"relationshipType": "one-to-many",
+            "relationshipName": "jhiUser",
+            "otherEntityName": "jhiUser",
+            "otherEntityField": "id"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "userId",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "budderflyId",
+            "fieldType": "String"
+        }
+    ],
+    "changelogDate": "20190509210452",
+    "dto": "mapstruct",
+    "service": "serviceImpl",
+    "entityTableName": "user_site",
+    "jpaMetamodelFiltering": true,
+    "pagination": "pagination",
+	"microserviceName": "authenticate"
+}
