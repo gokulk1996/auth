@@ -10,97 +10,67 @@ public class ContactDTO implements Serializable {
 
     private Long id;
 
-    @JsonProperty("ID")
     private String zohoId;
 
-    @JsonProperty("Contact_Type")
     private String contactType;
 
-    @JsonProperty("Approved")
     private Boolean approved;
 
-    @JsonProperty("Agreement")
     private Boolean agreement;
 
-    @JsonProperty("Company_Name")
     private String companyName;
 
-    @JsonProperty("Name")
     private String name;
 
-    @JsonProperty("Contact_Email")
     private String contactEmail;
 
-    @JsonProperty("CC_Emails.Email")
     private String ccEmails;
 
-    @JsonProperty("Phone_Number")
     private String phoneNumber;
 
-    @JsonProperty("Contact_Address")
     private String contactAddress;
 
-    @JsonProperty("State")
     private String state;
 
-    @JsonProperty("Location_Valid")
     private Boolean locationValid;
 
-    @JsonProperty("Latitude")
     private String latitude;
 
-    @JsonProperty("Longitude")
     private String longitude;
 
-    @JsonProperty("Webpage")
     private String webpage;
 
     @Lob
-    @JsonProperty("About_me")
     private String notes;
 
-    @JsonProperty("User")
     private String user;
 
-    @JsonProperty("Service_Range")
     private Integer serviceRange;
 
-    @JsonProperty("Day_Time_Hourly")
     private Float dayTimeHourly;
 
-    @JsonProperty("Day_Time_Blended")
     private Float dayTimeBlended;
 
-    @JsonProperty("Night_Time_Hourly")
     private Float nightTimeHourly;
 
-    @JsonProperty("Night_Time_Blended")
     private Float nightTimeBlended;
 
-    @JsonProperty("Other_Fees")
     private String otherFees;
 
-    @JsonProperty("Travel_Fees")
     private String travelFees;
 
-    @JsonProperty("Contractor_Specialty")
     private String contractorSpecialty;
 
-    @JsonProperty("Rating")
     private String rating;
 
     private Boolean removedInZoho = false;
 
-    @JsonProperty("City")
     private String city;
 
-    @JsonProperty("Street")
     private String street;
 
-    @JsonProperty("Zip_Code")
     private String zipCode;
 
-    @JsonProperty("Country")
     private String country;
 
     public Long getId() {

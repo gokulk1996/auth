@@ -1,19 +1,21 @@
 package com.cme.budderfly.authenticate.web.rest;
 
 import com.cme.budderfly.authenticate.config.Constants;
-import com.codahale.metrics.annotation.Timed;
 import com.cme.budderfly.authenticate.domain.User;
+import com.cme.budderfly.authenticate.domain.enumeration.CustomerType;
 import com.cme.budderfly.authenticate.repository.UserRepository;
 import com.cme.budderfly.authenticate.repository.search.UserSearchRepository;
 import com.cme.budderfly.authenticate.security.AuthoritiesConstants;
 import com.cme.budderfly.authenticate.service.MailService;
 import com.cme.budderfly.authenticate.service.UserService;
 import com.cme.budderfly.authenticate.service.dto.UserDTO;
+import com.cme.budderfly.authenticate.service.mapper.UserMapper;
 import com.cme.budderfly.authenticate.web.rest.errors.BadRequestAlertException;
 import com.cme.budderfly.authenticate.web.rest.errors.EmailAlreadyUsedException;
 import com.cme.budderfly.authenticate.web.rest.errors.LoginAlreadyUsedException;
 import com.cme.budderfly.authenticate.web.rest.util.HeaderUtil;
 import com.cme.budderfly.authenticate.web.rest.util.PaginationUtil;
+import com.codahale.metrics.annotation.Timed;
 import io.github.jhipster.web.util.ResponseUtil;
 
 import org.slf4j.Logger;
@@ -23,7 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -65,20 +67,23 @@ public class UserResource {
 
     private final Logger log = LoggerFactory.getLogger(UserResource.class);
 
-    private final UserRepository userRepository;
-
     private final UserService userService;
+
+    private final UserRepository userRepository;
 
     private final MailService mailService;
 
+    private final UserMapper userMapper;
+
     private final UserSearchRepository userSearchRepository;
 
-    public UserResource(UserRepository userRepository, UserService userService, MailService mailService, UserSearchRepository userSearchRepository) {
+    public UserResource(UserService userService, UserRepository userRepository, MailService mailService, UserSearchRepository userSearchRepository, UserMapper userMapper) {
 
-        this.userRepository = userRepository;
         this.userService = userService;
+        this.userRepository = userRepository;
         this.mailService = mailService;
         this.userSearchRepository = userSearchRepository;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -95,8 +100,8 @@ public class UserResource {
      */
     @PostMapping("/users")
     @Timed
-    @Secured(AuthoritiesConstants.ADMIN)
-    public ResponseEntity<User> createUser(@Valid @RequestBody UserDTO userDTO) throws URISyntaxException {
+    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<User> createUser(@Valid @RequestBody UserDTO userDTO) throws URISyntaxException, Exception {
         log.debug("REST request to save User : {}", userDTO);
 
         if (userDTO.getId() != null) {
@@ -107,11 +112,21 @@ public class UserResource {
         } else if (userRepository.findOneByEmailIgnoreCase(userDTO.getEmail()).isPresent()) {
             throw new EmailAlreadyUsedException();
         } else {
-            User newUser = userService.createUser(userDTO);
-            mailService.sendCreationEmail(newUser);
-            return ResponseEntity.created(new URI("/api/users/" + newUser.getLogin()))
-                .headers(HeaderUtil.createAlert( "userManagement.created", newUser.getLogin()))
-                .body(newUser);
+            Boolean onlyPortal = Optional.ofNullable(userDTO.getAuthorities())
+                .map(authentication -> authentication.stream()
+                    .allMatch(grantedAuthority -> grantedAuthority.equals(AuthoritiesConstants.PORTAL))).orElse(false);
+
+            if (onlyPortal) {
+                String domain = (userDTO.getDefaultPartner().equals(CustomerType.ZIPPYYUM)) ? CustomerType.ZIPPYYUM.toLowerCase() : CustomerType.BUDDERFLY.toLowerCase();
+                mailService.sendPortalRegisterationMail(userDTO.getEmail(), domain);
+            } else {
+                User newUser = userService.createUser(userDTO);
+                mailService.sendCreationEmail(newUser);
+            }
+
+            return ResponseEntity.created(new URI("/api/users/" + userDTO.getLogin()))
+                .headers(HeaderUtil.createAlert( "userManagement.created", userDTO.getLogin()))
+                .body(userMapper.userDTOToUser(userDTO));
         }
     }
 
@@ -125,7 +140,7 @@ public class UserResource {
      */
     @PutMapping("/users")
     @Timed
-    @Secured(AuthoritiesConstants.ADMIN)
+    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserDTO userDTO) {
         log.debug("REST request to update User : {}", userDTO);
         Optional<User> existingUser = userRepository.findOneByEmailIgnoreCase(userDTO.getEmail());
@@ -161,7 +176,7 @@ public class UserResource {
      */
     @GetMapping("/users/authorities")
     @Timed
-    @Secured(AuthoritiesConstants.ADMIN)
+    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
     public List<String> getAuthorities() {
         return userService.getAuthorities();
     }
@@ -189,7 +204,7 @@ public class UserResource {
      */
     @DeleteMapping("/users/{login:" + Constants.LOGIN_REGEX + "}")
     @Timed
-    @Secured(AuthoritiesConstants.ADMIN)
+    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> deleteUser(@PathVariable String login) {
         log.debug("REST request to delete User: {}", login);
         userService.deleteUser(login);

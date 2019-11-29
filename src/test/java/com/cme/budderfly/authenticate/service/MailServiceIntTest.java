@@ -1,9 +1,12 @@
 package com.cme.budderfly.authenticate.service;
+import com.cme.budderfly.authenticate.client.InventoryClient;
 import com.cme.budderfly.authenticate.config.ApplicationProperties;
 import com.cme.budderfly.authenticate.config.Constants;
 
 import com.cme.budderfly.authenticate.AuthenticateApp;
+import com.cme.budderfly.authenticate.config.EmailProperties;
 import com.cme.budderfly.authenticate.domain.User;
+import com.cme.budderfly.authenticate.service.mapper.UserMapper;
 import io.github.jhipster.config.JHipsterProperties;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +21,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.thymeleaf.spring4.SpringTemplateEngine;
+import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
@@ -27,7 +30,7 @@ import javax.mail.internet.MimeMultipart;
 import java.io.ByteArrayOutputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -46,26 +49,37 @@ public class MailServiceIntTest {
     @Autowired
     private SpringTemplateEngine templateEngine;
 
+    @Autowired
+    private UserSiteService userSiteService;
+
+    @Autowired
+    private InventoryClient inventoryClient;
+
+    @Autowired
+    private UserMapper userMapper;
+
     @Spy
     private JavaMailSenderImpl javaMailSender;
 
     @Captor
-    private ArgumentCaptor messageCaptor;
+    private ArgumentCaptor<MimeMessage> messageCaptor;
 
     private MailService mailService;
+
+    private EmailProperties mailProperties;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         doNothing().when(javaMailSender).send(any(MimeMessage.class));
-        mailService = new MailService(jHipsterProperties, javaMailSender, messageSource, templateEngine, applicationProperties);
+        mailService = new MailService(jHipsterProperties, javaMailSender, inventoryClient, userMapper, mailProperties, messageSource, templateEngine, applicationProperties, userSiteService);
     }
 
     @Test
     public void testSendEmail() throws Exception {
-        mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", false, false);
-        verify(javaMailSender).send((MimeMessage) messageCaptor.capture());
-        MimeMessage message = (MimeMessage) messageCaptor.getValue();
+        mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", false, false, "donotreply@budderfly.com");
+        verify(javaMailSender).send(messageCaptor.capture());
+        MimeMessage message = messageCaptor.getValue();
         assertThat(message.getSubject()).isEqualTo("testSubject");
         assertThat(message.getAllRecipients()[0].toString()).isEqualTo("john.doe@example.com");
         assertThat(message.getFrom()[0].toString()).isEqualTo("test@localhost");
@@ -76,9 +90,9 @@ public class MailServiceIntTest {
 
     @Test
     public void testSendHtmlEmail() throws Exception {
-        mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", false, true);
-        verify(javaMailSender).send((MimeMessage) messageCaptor.capture());
-        MimeMessage message = (MimeMessage) messageCaptor.getValue();
+        mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", false, true, "donotreply@budderfly.com");
+        verify(javaMailSender).send(messageCaptor.capture());
+        MimeMessage message = messageCaptor.getValue();
         assertThat(message.getSubject()).isEqualTo("testSubject");
         assertThat(message.getAllRecipients()[0].toString()).isEqualTo("john.doe@example.com");
         assertThat(message.getFrom()[0].toString()).isEqualTo("test@localhost");
@@ -89,9 +103,9 @@ public class MailServiceIntTest {
 
     @Test
     public void testSendMultipartEmail() throws Exception {
-        mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", true, false);
-        verify(javaMailSender).send((MimeMessage) messageCaptor.capture());
-        MimeMessage message = (MimeMessage) messageCaptor.getValue();
+        mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", true, false, "donotreply@budderfly.com");
+        verify(javaMailSender).send(messageCaptor.capture());
+        MimeMessage message = messageCaptor.getValue();
         MimeMultipart mp = (MimeMultipart) message.getContent();
         MimeBodyPart part = (MimeBodyPart) ((MimeMultipart) mp.getBodyPart(0).getContent()).getBodyPart(0);
         ByteArrayOutputStream aos = new ByteArrayOutputStream();
@@ -106,9 +120,9 @@ public class MailServiceIntTest {
 
     @Test
     public void testSendMultipartHtmlEmail() throws Exception {
-        mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", true, true);
-        verify(javaMailSender).send((MimeMessage) messageCaptor.capture());
-        MimeMessage message = (MimeMessage) messageCaptor.getValue();
+        mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", true, true, "donotreply@budderfly.com");
+        verify(javaMailSender).send(messageCaptor.capture());
+        MimeMessage message = messageCaptor.getValue();
         MimeMultipart mp = (MimeMultipart) message.getContent();
         MimeBodyPart part = (MimeBodyPart) ((MimeMultipart) mp.getBodyPart(0).getContent()).getBodyPart(0);
         ByteArrayOutputStream aos = new ByteArrayOutputStream();
@@ -127,13 +141,13 @@ public class MailServiceIntTest {
         user.setLogin("john");
         user.setEmail("john.doe@example.com");
         user.setLangKey("en");
-        mailService.sendEmailFromTemplate(user, "testEmail", "email.test.title");
-        verify(javaMailSender).send((MimeMessage) messageCaptor.capture());
-        MimeMessage message = (MimeMessage) messageCaptor.getValue();
+        mailService.sendEmailFromTemplate(user, "mail/testEmail", "email.test.title");
+        verify(javaMailSender).send(messageCaptor.capture());
+        MimeMessage message = messageCaptor.getValue();
         assertThat(message.getSubject()).isEqualTo("test title");
         assertThat(message.getAllRecipients()[0].toString()).isEqualTo(user.getEmail());
         assertThat(message.getFrom()[0].toString()).isEqualTo("test@localhost");
-        assertThat(message.getContent().toString()).isEqualTo("<html>test title, http://127.0.0.1:8080, john</html>\n");
+        assertThat(message.getContent().toString()).isEqualToNormalizingNewlines("<html>test title, http://127.0.0.1:8080, john</html>\n");
         assertThat(message.getDataHandler().getContentType()).isEqualTo("text/html;charset=UTF-8");
     }
 
@@ -144,8 +158,8 @@ public class MailServiceIntTest {
         user.setLogin("john");
         user.setEmail("john.doe@example.com");
         mailService.sendActivationEmail(user);
-        verify(javaMailSender).send((MimeMessage) messageCaptor.capture());
-        MimeMessage message = (MimeMessage) messageCaptor.getValue();
+        verify(javaMailSender).send(messageCaptor.capture());
+        MimeMessage message = messageCaptor.getValue();
         assertThat(message.getAllRecipients()[0].toString()).isEqualTo(user.getEmail());
         assertThat(message.getFrom()[0].toString()).isEqualTo("test@localhost");
         assertThat(message.getContent().toString()).isNotEmpty();
@@ -159,8 +173,8 @@ public class MailServiceIntTest {
         user.setLogin("john");
         user.setEmail("john.doe@example.com");
         mailService.sendCreationEmail(user);
-        verify(javaMailSender).send((MimeMessage) messageCaptor.capture());
-        MimeMessage message = (MimeMessage) messageCaptor.getValue();
+        verify(javaMailSender).send(messageCaptor.capture());
+        MimeMessage message = messageCaptor.getValue();
         assertThat(message.getAllRecipients()[0].toString()).isEqualTo(user.getEmail());
         assertThat(message.getFrom()[0].toString()).isEqualTo("test@localhost");
         assertThat(message.getContent().toString()).isNotEmpty();
@@ -174,8 +188,8 @@ public class MailServiceIntTest {
         user.setLogin("john");
         user.setEmail("john.doe@example.com");
         mailService.sendPasswordResetMail(user);
-        verify(javaMailSender).send((MimeMessage) messageCaptor.capture());
-        MimeMessage message = (MimeMessage) messageCaptor.getValue();
+        verify(javaMailSender).send(messageCaptor.capture());
+        MimeMessage message = messageCaptor.getValue();
         assertThat(message.getAllRecipients()[0].toString()).isEqualTo(user.getEmail());
         assertThat(message.getFrom()[0].toString()).isEqualTo("test@localhost");
         assertThat(message.getContent().toString()).isNotEmpty();
@@ -185,7 +199,7 @@ public class MailServiceIntTest {
     @Test
     public void testSendEmailWithException() throws Exception {
         doThrow(MailSendException.class).when(javaMailSender).send(any(MimeMessage.class));
-        mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", false, false);
+        mailService.sendEmail("john.doe@example.com", "testSubject", "testContent", false, false, "donotreply@budderfly.com");
     }
 
 }

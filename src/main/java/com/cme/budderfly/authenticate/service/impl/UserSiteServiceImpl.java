@@ -81,7 +81,7 @@ public class UserSiteServiceImpl implements UserSiteService {
     @Transactional(readOnly = true)
     public UserSiteDTO findOne(Long id) {
         log.debug("Request to get UserSite : {}", id);
-        UserSite userSite = userSiteRepository.findOne(id);
+        UserSite userSite = userSiteRepository.getOne(id);
         return userSiteMapper.toDto(userSite);
     }
 
@@ -101,8 +101,18 @@ public class UserSiteServiceImpl implements UserSiteService {
     @Override
     public void delete(Long id) {
         log.debug("Request to delete UserSite : {}", id);
-        userSiteRepository.delete(id);
-        userSiteSearchRepository.delete(id);
+        userSiteRepository.deleteById(id);
+        userSiteSearchRepository.deleteById(id);
+    }
+
+    @Override
+    public void deleteFromUserIdAndBudderflyId(Long userId, String budderflyId) {
+        log.debug("Request to delete UserSite from " + userId + " and " + budderflyId);
+        UserSite userSite = userSiteRepository.findByUserIdAndBudderflyId(userId, budderflyId);
+
+        if (userSite != null) {
+            delete(userSite.getId());
+        }
     }
 
     /**

@@ -9,6 +9,7 @@ import com.cme.budderfly.authenticate.repository.UserRepository;
 import com.cme.budderfly.authenticate.security.SecurityUtils;
 import com.cme.budderfly.authenticate.service.MailService;
 import com.cme.budderfly.authenticate.service.UserService;
+import com.cme.budderfly.authenticate.service.dto.PasswordChangeDTO;
 import com.cme.budderfly.authenticate.service.dto.UserDTO;
 import com.cme.budderfly.authenticate.web.rest.errors.*;
 import com.cme.budderfly.authenticate.web.rest.vm.KeyAndPasswordVM;
@@ -62,12 +63,10 @@ public class AccountResource {
     @PostMapping("/register")
     @Timed
     @ResponseStatus(HttpStatus.CREATED)
-    public void registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
+    public void registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) throws Exception {
         if (!checkPasswordLength(managedUserVM.getPassword())) {
             throw new InvalidPasswordException();
         }
-        userRepository.findOneByLogin(managedUserVM.getLogin().toLowerCase()).ifPresent(u -> {throw new LoginAlreadyUsedException();});
-        userRepository.findOneByEmailIgnoreCase(managedUserVM.getEmail()).ifPresent(u -> {throw new EmailAlreadyUsedException();});
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
         mailService.sendActivationEmail(user);
     }
@@ -75,30 +74,36 @@ public class AccountResource {
     @PostMapping("/register-portal-user")
     @Timed
     @ResponseStatus(HttpStatus.CREATED)
-    public void registerPortalAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
+    public void registerPortalAccount(@Valid @RequestBody ManagedUserVM managedUserVM, HttpServletRequest request) {
         if (!checkPasswordLength(managedUserVM.getPassword())) {
             throw new InvalidPasswordException();
         }
+        String domain = request.getHeader("referer").toLowerCase();
         userRepository.findOneByLogin(managedUserVM.getLogin().toLowerCase()).ifPresent(u -> {throw new LoginAlreadyUsedException();});
         userRepository.findOneByEmailIgnoreCase(managedUserVM.getEmail()).ifPresent(u -> {throw new EmailAlreadyUsedException();});
-        User user = userService.registerPortalUser(managedUserVM, managedUserVM.getPassword());
+        User user = userService.registerPortalUser(managedUserVM, managedUserVM.getPassword(), domain);
     }
 
-
+    /**
+     * Registers a user of role Portal- the logic for portal registration is different than a normal user which is why we have this separate endpoint.
+     * @param email
+     * @param request - to get the domain since we use different email templates based on it
+     * @throws Exception - when the template does not exist in the DB
+     */
     @PostMapping("/send-register-for-portal")
     @Timed
-    public ResponseEntity<String> sendRegisterForPortal(@RequestParam String email) {
+    public ResponseEntity<String> sendRegisterForPortal(@RequestParam String email, HttpServletRequest request) throws Exception {
         Boolean isValid = true;
         String message = email + " cannot be registered";
+        String domain = request.getHeader("referer").toLowerCase();
 
         Optional<User> user = userRepository.findOneByEmailIgnoreCase(email);
         if (user.isPresent()) {
-            isValid = false;
             throw new EmailAlreadyUsedException();
         }
 
         try {
-            List<ContactDTO> contacts = contacts = sitesClient.getContactsByEmail(email);
+            List<ContactDTO> contacts = sitesClient.getContactsByContainEmail(email);
             if (contacts == null || contacts.isEmpty()) {
                 isValid = false;
                 message = "Email is not listed in the contacts table";
@@ -114,7 +119,7 @@ public class AccountResource {
         }
 
         if (isValid){
-            mailService.sendPortalRegisterationMail(email);
+            mailService.sendPortalRegisterationMail(email, domain);
             return ResponseEntity.ok("success");
         }
 
@@ -132,7 +137,7 @@ public class AccountResource {
     public void activateAccount(@RequestParam(value = "key") String key) {
         Optional<User> user = userService.activateRegistration(key);
         if (!user.isPresent()) {
-            throw new InternalServerErrorException("No user was found for this reset key");
+            throw new InternalServerErrorException("No user was found for this activation key");
         }
     }
 
@@ -184,22 +189,22 @@ public class AccountResource {
         }
         userService.updateUser(userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail(),
             userDTO.getLangKey(), userDTO.getImageUrl());
-   }
+    }
 
     /**
      * POST  /account/change-password : changes the current user's password
      *
-     * @param password the new password
+     * @param passwordChangeDto current and new password
      * @throws InvalidPasswordException 400 (Bad Request) if the new password is incorrect
      */
     @PostMapping(path = "/account/change-password")
     @Timed
-    public void changePassword(@RequestBody String password) {
-        if (!checkPasswordLength(password)) {
+    public void changePassword(@RequestBody PasswordChangeDTO passwordChangeDto) {
+        if (!checkPasswordLength(passwordChangeDto.getNewPassword())) {
             throw new InvalidPasswordException();
         }
-        userService.changePassword(password);
-   }
+        userService.changePassword(passwordChangeDto.getCurrentPassword(), passwordChangeDto.getNewPassword());
+    }
 
     /**
      * POST   /account/reset-password/init : Send an email to reset the password of the user
@@ -209,11 +214,9 @@ public class AccountResource {
      */
     @PostMapping(path = "/account/reset-password/init")
     @Timed
-    public void requestPasswordReset(@RequestBody String mail) {
+    public void requestPasswordReset(@RequestBody String mail) throws Exception {
        mailService.sendPasswordResetMail(
-           userService.requestPasswordReset(mail)
-               .orElseThrow(EmailNotFoundException::new)
-       );
+           userService.requestPasswordReset(mail).orElseThrow(EmailNotFoundException::new));
     }
 
     /**

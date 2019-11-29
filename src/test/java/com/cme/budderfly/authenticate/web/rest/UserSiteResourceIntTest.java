@@ -394,7 +394,7 @@ public class UserSiteResourceIntTest {
         assertThat(userSiteList).hasSize(databaseSizeBeforeDelete - 1);
 
         // Validate the UserSite in Elasticsearch
-        verify(mockUserSiteSearchRepository, times(1)).delete(userSite.getId());
+        verify(mockUserSiteSearchRepository, times(1)).deleteById(userSite.getId());
     }
 
     @Test

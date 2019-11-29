@@ -5,8 +5,8 @@ import com.cme.budderfly.authenticate.config.Constants;
 import com.cme.budderfly.authenticate.domain.Authority;
 import com.cme.budderfly.authenticate.domain.User;
 
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
 import javax.validation.constraints.*;
 import java.time.Instant;
@@ -32,7 +32,7 @@ public class UserDTO {
     private String lastName;
 
     @Email
-    @Size(min = 5, max = 100)
+    @Size(min = 5, max = 254)
     private String email;
 
     @Size(max = 256)
@@ -50,6 +50,8 @@ public class UserDTO {
     private String lastModifiedBy;
 
     private Instant lastModifiedDate;
+
+    private String defaultPartner;
 
     private Set<String> authorities;
 
@@ -70,6 +72,7 @@ public class UserDTO {
         this.createdDate = user.getCreatedDate();
         this.lastModifiedBy = user.getLastModifiedBy();
         this.lastModifiedDate = user.getLastModifiedDate();
+        this.defaultPartner = user.getDefaultPartner();
         this.authorities = user.getAuthorities().stream()
             .map(Authority::getName)
             .collect(Collectors.toSet());
@@ -77,6 +80,14 @@ public class UserDTO {
 
     public Long getId() {
         return id;
+    }
+
+    public String getDefaultPartner() {
+        return defaultPartner;
+    }
+
+    public void setDefaultPartner(String defaultPartner) {
+        this.defaultPartner = defaultPartner;
     }
 
     public void setId(Long id) {
@@ -194,6 +205,7 @@ public class UserDTO {
             ", lastModifiedBy='" + lastModifiedBy + '\'' +
             ", lastModifiedDate=" + lastModifiedDate +
             ", authorities=" + authorities +
+            ", defaultPartner=" + defaultPartner +
             "}";
     }
 }

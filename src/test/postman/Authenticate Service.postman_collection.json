@@ -1,0 +1,194 @@
+{
+	"info": {
+		"_postman_id": "afac9f0f-dc55-4bd2-b3a3-db16a2b51ea6",
+		"name": "Authenticate Service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "QA XSRF TOKEN",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f24ecb67-fb8c-49a3-830e-98ce8e62de89",
+						"exec": [
+							"var xsrf = pm.cookies.get(\"XSRF-TOKEN\");",
+							"pm.globals.set(\"xsrf_token\", xsrf);",
+							"console.log(\"XSRF-TOKEN\", pm.globals.get(\"xsrf_token\"));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Cookie",
+						"value": "XSRF-TOKEN=7ecc0185-6459-4af1-b54d-39f1a09b4efa"
+					},
+					{
+						"key": "X-XSRF-TOKEN",
+						"value": "7ecc0185-6459-4af1-b54d-39f1a09b4efa"
+					},
+					{
+						"key": "",
+						"value": "",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://qa1ms.budderfly.com",
+					"protocol": "https",
+					"host": [
+						"qa1ms",
+						"budderfly",
+						"com"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "QA Authenticate",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "37c9244f-f5f3-4fd1-9f23-d29c15ec4bac",
+						"exec": [
+							"pm.test(\"Response has expected data\", function(){",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.deep.property(\"access_token\");",
+							"    pm.expect(json).to.have.deep.property(\"refresh_token\");",
+							"    ",
+							"    pm.globals.set(\"access_token\", json.access_token);",
+							"    pm.globals.set(\"refresh_token\", json.refresh_token);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Cookie",
+						"value": "XSRF-TOKEN={{xsrf_token}}"
+					},
+					{
+						"key": "X-XSRF-TOKEN",
+						"value": "{{xsrf_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"admin\",\n\t\"password\": \"Budderfly2018\"\n}"
+				},
+				"url": {
+					"raw": "https://qa1ms.budderfly.com/auth/login",
+					"protocol": "https",
+					"host": [
+						"qa1ms",
+						"budderfly",
+						"com"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "QA regiter portal user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "91ee538b-b7a7-44d4-b11b-8d2debbc682d",
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "XSRF-TOKEN=7ecc0185-6459-4af1-b54d-39f1a09b4efa",
+						"type": "text"
+					},
+					{
+						"key": "X-XSRF-TOKEN",
+						"value": "7ecc0185-6459-4af1-b54d-39f1a09b4efa",
+						"type": "text"
+					},
+					{
+						"key": "Referer",
+						"value": "BUDDERFLY",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://qa1ms.budderfly.com/authenticate/api/send-register-for-portal?email=testuser@test.com",
+					"protocol": "https",
+					"host": [
+						"qa1ms",
+						"budderfly",
+						"com"
+					],
+					"path": [
+						"authenticate",
+						"api",
+						"send-register-for-portal"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "testuser@test.com"
+						},
+						{
+							"key": "referer",
+							"value": "BUDDERFLY",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

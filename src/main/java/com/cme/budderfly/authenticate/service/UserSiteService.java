@@ -56,4 +56,6 @@ public interface UserSiteService {
      * @return the list of entities
      */
     Page<UserSiteDTO> search(String query, Pageable pageable);
+
+    void deleteFromUserIdAndBudderflyId(Long userId, String budderflyId);
 }

@@ -15,6 +15,7 @@ import java.util.Map;
  */
 @Component
 public class IatTokenEnhancer implements TokenEnhancer {
+
     @Override
     public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
         addClaims((DefaultOAuth2AccessToken) accessToken);
@@ -24,7 +25,7 @@ public class IatTokenEnhancer implements TokenEnhancer {
     private void addClaims(DefaultOAuth2AccessToken accessToken) {
         DefaultOAuth2AccessToken token = accessToken;
         Map<String, Object> additionalInformation = token.getAdditionalInformation();
-        if(additionalInformation.isEmpty()) {
+        if (additionalInformation.isEmpty()) {
             additionalInformation = new LinkedHashMap<String, Object>();
         }
         //add "iat" claim with current time in secs

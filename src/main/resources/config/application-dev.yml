@@ -3,8 +3,8 @@
 #
 # This configuration overrides the application.yml file.
 #
-# More information on profiles: http://www.jhipster.tech/profiles/
-# More information on configuration properties: http://www.jhipster.tech/common-application-properties/
+# More information on profiles: https://www.jhipster.tech/profiles/
+# More information on configuration properties: https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
 # ===================================================================
@@ -16,8 +16,8 @@
 logging:
     level:
         ROOT: DEBUG
-        com.cme.budderfly.authenticate: DEBUG
         io.github.jhipster: DEBUG
+        com.cme.budderfly.authenticate: DEBUG
 
 eureka:
     instance:
@@ -29,55 +29,64 @@ eureka:
 spring:
     profiles:
         active: dev
-        include: swagger
+        include:
+            - swagger
+            # Uncomment to activate TLS for the dev profile
+            #- tls
     devtools:
         restart:
             enabled: true
+            additional-exclude: .h2.server.properties
         livereload:
-            enabled: false # we use gulp + BrowserSync for livereload
+            enabled: false # we use Webpack dev server + BrowserSync for livereload
     jackson:
-        serialization.indent_output: true
+        serialization:
+            indent-output: true
     datasource:
-       type: com.zaxxer.hikari.HikariDataSource
-       url: jdbc:mysql://localhost:3306/authenticate?useUnicode=true&characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull
-       username: root
-       password: root
-       hikari:
-           data-source-properties:
-               cachePrepStmts: true
-               prepStmtCacheSize: 250
-               prepStmtCacheSqlLimit: 2048
-               useServerPrepStmts: true
+        type: com.zaxxer.hikari.HikariDataSource
+        url: jdbc:mysql://localhost:3306/authenticate?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+        username: root
+        password: root
+        hikari:
+            auto-commit: false
+            data-source-properties:
+                cachePrepStmts: true
+                prepStmtCacheSize: 250
+                prepStmtCacheSqlLimit: 2048
+                useServerPrepStmts: true
     jpa:
-        database-platform: io.github.jhipster.domain.util.FixedH2Dialect
-        database: H2
-        show-sql: true
+        database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+        database: MYSQL
+        show-sql: false
         properties:
             hibernate.id.new_generator_mappings: true
+            hibernate.connection.provider_disables_autocommit: true
             hibernate.cache.use_second_level_cache: true
             hibernate.cache.use_query_cache: false
-            hibernate.generate_statistics: true
+            hibernate.generate_statistics: false
             hibernate.cache.region.factory_class: com.hazelcast.hibernate.HazelcastCacheRegionFactory
             hibernate.cache.hazelcast.instance_name: authenticate
             hibernate.cache.use_minimal_puts: true
             hibernate.cache.hazelcast.use_lite_member: true
     data:
         elasticsearch:
-            cluster-name:
-            cluster-nodes:
             properties:
                 path:
-                    logs: target/elasticsearch/log
-                    data: target/elasticsearch/data
+                    home: target/elasticsearch
+    liquibase:
+        contexts: dev
     mail:
-        host: debugmail.io
-        port: 25
-        username: payments@budderfly.com
-        password: 6a3d48c0-1f40-11e9-ad37-8f34cd21af4f
+        host: ${SPRING_MAIL_HOST}
+        port: ${SPRING_MAIL_PORT}
+        username: ${SPRING_MAIL_USERNAME}
+        password: ${SPRING_MAIL_PASSWORD}
     messages:
-        cache-seconds: 1
+        cache-duration: PT1S # 1 second, see the ISO 8601 standard
     thymeleaf:
         cache: false
+    sleuth:
+        sampler:
+            probability: 1 # report 100% of traces
     zipkin: # Use the "zipkin" Maven profile to have the Spring Cloud Zipkin dependencies
         base-url: http://localhost:9411
         enabled: false
@@ -85,38 +94,18 @@ spring:
             discovery:
                 enabled: true
 
-liquibase:
-    contexts: dev
-
-# ===================================================================
-# To enable SSL, generate a certificate using:
-# keytool -genkey -alias authenticate -storetype PKCS12 -keyalg RSA -keysize 2048 -keystore keystore.p12 -validity 3650
-#
-# You can also use Let's Encrypt:
-# https://maximilian-boehm.com/hp2121/Create-a-Java-Keystore-JKS-from-Let-s-Encrypt-Certificates.htm
-#
-# Then, modify the server.ssl properties so your "server" configuration looks like:
-#
-# server:
-#    port: 8443
-#    ssl:
-#        key-store: keystore.p12
-#        key-store-password: <your-password>
-#        key-store-type: PKCS12
-#        key-alias: authenticate
-# ===================================================================
 server:
     port: 9999
 
 # ===================================================================
 # JHipster specific properties
 #
-# Full reference is available at: http://www.jhipster.tech/common-application-properties/
+# Full reference is available at: https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
 jhipster:
     http:
-        version: V_1_1 # To use HTTP/2 you will need SSL support (see above the "server.ssl" configuration)
+        version: V_1_1 # To use HTTP/2 you will need to activate TLS (see application-tls.yml)
     cache: # Cache configuration
         hazelcast: # Hazelcast distributed cache
             time-to-live-seconds: 3600
@@ -135,21 +124,18 @@ jhipster:
         max-age: 1800
     security:
         client-authorization:
+            access-token-uri: http://authenticate/oauth/token
+            token-service-id: authenticate
             client-id: internal
             client-secret: internal
     mail: # specific JHipster mail property, for standard properties see MailProperties
-        from: authenticate@localhost
-        base-url: http://127.0.0.1:9999
+        from: ${SPRING_MAIL_FROM_EMAIL}
+        base-url: ${JHIPSTER_MAIL_BASE_URL}
     metrics: # DropWizard Metrics configuration, used by MetricsConfiguration
-        jmx.enabled: true
-        graphite: # Use the "graphite" Maven profile to have the Graphite dependencies
-            enabled: false
-            host: localhost
-            port: 2003
-            prefix: authenticate
-        prometheus: # Use the "prometheus" Maven profile to have the Prometheus dependencies
-            enabled: false
-            endpoint: /prometheusMetrics
+        jmx:
+            enabled: true
+        prometheus:
+            enabled: false #expose metrics via prometheus
         logs: # Reports Dropwizard metrics in the logs
             enabled: false
             report-frequency: 60 # in seconds
@@ -160,10 +146,11 @@ jhipster:
             port: 5000
             queue-size: 512
     registry:
-        password: admin
+       password: admin
+
 uaa:
     key-store:
-        name: keystore.jks
+        name: config/tls/keystore.p12
         password: password
         alias: selfsigned
     web-client-configuration:
@@ -180,7 +167,7 @@ uaa:
 # to have type-safe configuration, like in the JHipsterProperties above
 #
 # More documentation is available at:
-# http://www.jhipster.tech/common-application-properties/
+# https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-application:
+# application:

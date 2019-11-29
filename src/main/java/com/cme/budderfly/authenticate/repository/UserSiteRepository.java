@@ -17,4 +17,6 @@ public interface UserSiteRepository extends JpaRepository<UserSite, Long>, JpaSp
     @Query("SELECT m.budderflyId FROM UserSite m, JhiUser u WHERE u.login = ?1 AND m.userId = u.id")
     List<String> getShopsBasedOnUser(String login);
 
+    UserSite findByUserIdAndBudderflyId(Long userId, String budderflyId);
+
 }

@@ -147,6 +147,13 @@ public class UserSiteResource {
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
 
+    @DeleteMapping("/user-sites/by-login-id/{id}")
+    public ResponseEntity<Void> deleteUserSiteFromBudderflyId(@PathVariable Long id, @RequestParam String budderflyId) {
+        log.debug("REST request to delete UserSite from budderflyId " + id + " for " + budderflyId);
+        userSiteService.deleteFromUserIdAndBudderflyId(id, budderflyId);
+        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, budderflyId)).build();
+    }
+
     /**
      * SEARCH  /_search/user-sites?query=:query : search for the userSite corresponding
      * to the query.
