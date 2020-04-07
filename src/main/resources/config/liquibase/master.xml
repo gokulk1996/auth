@@ -9,6 +9,7 @@
     <include file="config/liquibase/changelog/20190506_portal_addrole.xml" relativeToChangelogFile="false"/>
 
     <include file="config/liquibase/changelog/20190509210453_added_entity_UserSite.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20200107_installer_service_addrole.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
 </databaseChangeLog>

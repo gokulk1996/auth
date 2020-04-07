@@ -14,6 +14,7 @@ import com.cme.budderfly.authenticate.service.dto.ContactDTO;
 import com.cme.budderfly.authenticate.service.dto.SiteDTO;
 import com.cme.budderfly.authenticate.service.dto.UserSiteDTO;
 import com.cme.budderfly.authenticate.service.dto.UserDTO;
+import com.cme.budderfly.authenticate.service.mapper.UserMapper;
 import com.cme.budderfly.authenticate.service.util.RandomUtil;
 import com.cme.budderfly.authenticate.web.rest.errors.*;
 
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * Service class for managing users.
@@ -52,11 +57,13 @@ public class UserService {
 
     private final CacheManager cacheManager;
 
+    private final UserMapper userMapper;
+
     private final SitesClient sitesClient;
 
     private final UserSiteService userSiteService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserSearchRepository userSearchRepository, AuthorityRepository authorityRepository, CacheManager cacheManager, SitesClient sitesClient, UserSiteService userSiteService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper, UserSearchRepository userSearchRepository, AuthorityRepository authorityRepository, CacheManager cacheManager, SitesClient sitesClient, UserSiteService userSiteService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userSearchRepository = userSearchRepository;
@@ -64,6 +71,8 @@ public class UserService {
         this.cacheManager = cacheManager;
         this.sitesClient = sitesClient;
         this.userSiteService = userSiteService;
+        this.userMapper = userMapper;
+
     }
 
     public Optional<User> activateRegistration(String key) {
@@ -379,5 +388,13 @@ public class UserService {
     private void clearUserCaches(User user) {
         Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE)).evict(user.getLogin());
         Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
+    }
+
+    public List<UserDTO> getUsersByQuery(String query, Pageable pageable) {
+        List<User> users = StreamSupport
+            .stream(userSearchRepository.search(queryStringQuery(query), pageable).spliterator(), false)
+            .collect(Collectors.toList());
+        List<UserDTO> userDTO = userMapper.usersToUserDTOs(users);
+        return userDTO;
     }
 }

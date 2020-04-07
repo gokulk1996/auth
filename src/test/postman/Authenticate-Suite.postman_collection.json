@@ -1,0 +1,526 @@
+{
+	"info": {
+		"_postman_id": "a9d2147c-3b81-4f92-93e7-aecc116e12cd",
+		"name": "Authenticate-Suite",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authenticate CRUD",
+			"item": [
+				{
+					"name": "POST Register Portal User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e1b6fad0-bf6e-43bb-a3bc-d8d0623a951a",
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d225e841-e762-420d-9f9b-32d08ae3d7ad",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Referer",
+								"value": "cadderpillar",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{SERVER_URL}}/authenticate/api/send-register-for-portal?email={{reg-test-email}}",
+							"host": [
+								"{{SERVER_URL}}"
+							],
+							"path": [
+								"authenticate",
+								"api",
+								"send-register-for-portal"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{reg-test-email}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET authorities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e1b6fad0-bf6e-43bb-a3bc-d8d0623a951a",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    ",
+									"    pm.expect(jsonData).to.have.lengthOf(5)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d225e841-e762-420d-9f9b-32d08ae3d7ad",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{SERVER_URL}}/authenticate/api/users/authorities",
+							"host": [
+								"{{SERVER_URL}}"
+							],
+							"path": [
+								"authenticate",
+								"api",
+								"users",
+								"authorities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Create User Site",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e1b6fad0-bf6e-43bb-a3bc-d8d0623a951a",
+								"exec": [
+									"pm.test(\"User Site Created\", function () {",
+									"    pm.response.to.have.status(201)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d225e841-e762-420d-9f9b-32d08ae3d7ad",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"userId\": \"3\",\n\t\"budderflyId\": \"OLYM-10\"\n}"
+						},
+						"url": {
+							"raw": "{{SERVER_URL}}/authenticate/api/user-sites",
+							"host": [
+								"{{SERVER_URL}}"
+							],
+							"path": [
+								"authenticate",
+								"api",
+								"user-sites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e1b6fad0-bf6e-43bb-a3bc-d8d0623a951a",
+								"exec": [
+									"pm.test(function () {",
+									"    pm.response.to.have.status(200)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d225e841-e762-420d-9f9b-32d08ae3d7ad",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{SERVER_URL}}/authenticate/api/_search/users/query=\"gokul\"?page=-1&size=20",
+							"host": [
+								"{{SERVER_URL}}"
+							],
+							"path": [
+								"authenticate",
+								"api",
+								"_search",
+								"users",
+								"query=\"gokul\""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "-1"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "374e2996-6f94-484a-8af2-d39c37d6e08a",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "bb65689b-2336-4a1c-a360-a425c322027c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Delete Tests",
+			"item": [
+				{
+					"name": "Delete User Site",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e1b6fad0-bf6e-43bb-a3bc-d8d0623a951a",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d225e841-e762-420d-9f9b-32d08ae3d7ad",
+								"exec": [
+									"  setTimeout(function(){\r",
+									"          console.log(\"Sleeping for 5 seconds to make sure import finished\");\r",
+									"  }, 5000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{SERVER_URL}}/authenticate/api/user-sites/by-login-id/3?budderflyId=OLYM-10",
+							"host": [
+								"{{SERVER_URL}}"
+							],
+							"path": [
+								"authenticate",
+								"api",
+								"user-sites",
+								"by-login-id",
+								"3"
+							],
+							"query": [
+								{
+									"key": "budderflyId",
+									"value": "OLYM-10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "6b941369-4486-4df5-bbe3-6a4b3979ec44",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "fafbecf5-4017-49d1-98be-eb19e78e35ef",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Clean up variables",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d27621ce-84a9-4672-81df-abf97ce7f421",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0765f2e-fc5b-4e98-80b2-d9413568160d",
+						"exec": [
+							"pm.environment.unset('xsrf_token');",
+							"pm.environment.unset('access_token');",
+							"pm.variables.set('AUTHENTICATE', true);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{SERVER_URL}}",
+					"host": [
+						"{{SERVER_URL}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "0c212c91-593e-40dd-88e0-f1da0233f6ad",
+				"type": "text/javascript",
+				"exec": [
+					"console.log('Executing Pre Request Collection', pm.variables.get('SERVER_URL'))",
+					"",
+					"var authenticate = pm.variables.get('AUTHENTICATE');",
+					"",
+					"console.log(\"Authenticate? > \" + authenticate);",
+					"",
+					"if (authenticate) {",
+					"    ",
+					"    const postAuthRequest = {",
+					"      url: pm.variables.get('SERVER_URL')+'/auth/login',",
+					"      method: 'POST',",
+					"      header: 'Content-Type:application/json',",
+					"      body: {",
+					"        mode: 'application/json',",
+					"        raw: JSON.stringify(",
+					"            {",
+					"                \"username\": pm.variables.get('USERNAME'),",
+					"                \"password\": pm.variables.get('PASSWORD')",
+					"            })",
+					"      }",
+					"    };",
+					"    ",
+					"    pm.sendRequest(postAuthRequest, function (err, res) {",
+					"        if (err === null) {",
+					"            var responseJson = res.json();",
+					"            console.log('Saving the Access Token:', responseJson.access_token);",
+					"            pm.environment.set('access_token', responseJson.access_token);",
+					"            ",
+					"            res.headers.all()",
+					"            .filter(header => { return header.key === 'Set-Cookie';})",
+					"            .forEach(header => {",
+					"                if (header.value.includes('XSRF-TOKEN')) {",
+					"                    // Expect a string like \"XSRF-TOKEN=3dcefa44-b265-417a-a90e-9a71cf34a398; path=/\"",
+					"                    // And want to extract the hash token \"3dcefa44-b265-417a-a90e-9a71cf34a398\"",
+					"                    var xsrf_token = header.value.split('XSRF-TOKEN=')[1];",
+					"                    xsrf_token = xsrf_token.split('; path')[0];",
+					"                    ",
+					"                    // Inserts a header name and header value as given to the list of headers",
+					"                    // for the current request (if the header does not exist, ",
+					"                    // otherwise the already existing header is updated to the new value).",
+					"                    pm.request.headers.add({key: 'X-XSRF-TOKEN', value: xsrf_token }); ",
+					"                }",
+					"            })",
+					"            ",
+					"",
+					"        } else {",
+					"            console.log('Error on GET Access Token' + err);",
+					"        }",
+					"        pm.variables.set('AUTHENTICATE', false);",
+					"    });",
+					"} else {",
+					"    // Inserts a header name and header value as given to the list of headers",
+					"    // for the current request (if the header does not exist, ",
+					"    // otherwise the already existing header is updated to the new value).",
+					"    var xsrf_token = pm.environment.get('xsrf_token');",
+					"    pm.request.headers.add({key: 'X-XSRF-TOKEN', value: xsrf_token }); ",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "d20ec067-81b5-44df-845b-fab927d7df79",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test('Verify Cookie and Token', function(){",
+					"    var cookie = pm.cookies.get('XSRF-TOKEN');",
+					"    pm.environment.set('xsrf_token', cookie);",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "6928e9d9-4890-481a-a65c-740f46b220e8",
+			"key": "reg-test-email",
+			"value": "testuser@test.com",
+			"type": "string"
+		},
+		{
+			"id": "836d0f51-e514-494c-81f8-c2a18da7cba4",
+			"key": "billing_cycle_id",
+			"value": "26",
+			"type": "string",
+			"disabled": true
+		},
+		{
+			"id": "e7a19228-0c91-4aee-aa4c-ebd13de73108",
+			"key": "candian_invoice_number",
+			"value": "19111-SUBW-52995",
+			"type": "string",
+			"disabled": true
+		}
+	],
+	"protocolProfileBehavior": {}
+}

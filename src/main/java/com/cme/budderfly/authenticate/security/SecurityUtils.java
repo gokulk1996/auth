@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Utility class for Spring Security.
@@ -12,6 +13,20 @@ import java.util.Optional;
 public final class SecurityUtils {
 
     private SecurityUtils() {
+    }
+
+    /**
+     * Get if the authority is in the list to search against
+     * @param authorities - list of authorities to check against
+     * @param authority - the authority we are looking for
+     * @return
+     */
+    public static boolean isInAuthorities(Set<String> authorities, String authority) {
+        Boolean isInAuthority = Optional.ofNullable(authorities)
+            .map(authentication -> authentication.stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.equals(authority))).orElse(false);
+
+        return isInAuthority;
     }
 
     /**

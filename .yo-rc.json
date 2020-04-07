@@ -4,7 +4,7 @@
       "packageName": "com.cme.budderfly.authenticate",
       "nativeLanguage": "en"
     },
-    "jhipsterVersion": "4.14.3",
+    "jhipsterVersion": "5.7.2",
     "baseName": "authenticate",
     "packageName": "com.cme.budderfly.authenticate",
     "packageFolder": "com/cme/budderfly/authenticate",
@@ -35,6 +35,7 @@
       "en"
     ],
     "clientPackageManager": "yarn",
-    "skipClient": true
+    "skipClient": true,
+    "otherModules": []
   }
 }

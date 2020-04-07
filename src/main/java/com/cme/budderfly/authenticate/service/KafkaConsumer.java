@@ -67,7 +67,7 @@ public class KafkaConsumer {
             Optional<User> user = userRepository.findOneByEmailIgnoreCase(email);
             if (!user.isPresent()) {
                 log.debug(email + " exists in sites but not authenticate, user did not register yet");
-                break;
+                continue;
             }
 
             List<String> shops = userSiteRepository.getShopsBasedOnUser(user.get().getLogin());

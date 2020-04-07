@@ -3,10 +3,12 @@ package com.cme.budderfly.authenticate.service;
 import com.cme.budderfly.authenticate.client.InventoryClient;
 import com.cme.budderfly.authenticate.config.ApplicationProperties;
 import com.cme.budderfly.authenticate.config.EmailProperties;
+import com.cme.budderfly.authenticate.domain.Authority;
 import com.cme.budderfly.authenticate.domain.User;
 
 import com.cme.budderfly.authenticate.domain.enumeration.CustomerType;
 import com.cme.budderfly.authenticate.security.AuthoritiesConstants;
+import com.cme.budderfly.authenticate.security.SecurityUtils;
 import com.cme.budderfly.authenticate.service.dto.TemplatesDTO;
 import com.cme.budderfly.authenticate.service.mapper.UserMapper;
 import io.github.jhipster.config.JHipsterProperties;
@@ -35,6 +37,7 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import javax.mail.internet.MimeMessage;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * Service for sending emails.
@@ -118,19 +121,27 @@ public class MailService {
         context.setVariable(USER, user);
         String customerType = CustomerType.BUDDERFLY;
 
-        Boolean onlyPortal = Optional.ofNullable(user.getAuthorities())
-            .map(authentication -> authentication.stream()
-            .allMatch(grantedAuthority -> grantedAuthority.getName().equals(AuthoritiesConstants.PORTAL))).orElse(false);
+        Set<String> authorities = user.getAuthorities().stream()
+            .map(Authority::getName)
+            .collect(Collectors.toSet());
 
-        if (onlyPortal) { // we need to set what link to use
-            templateName += "Portal";
-            List<String> sites = userSiteService.getShopsOwnedByUser(user.getLogin());
-            if (sites != null && !sites.isEmpty()) {
-                if (sites.get(0).contains("SUBW")) {
-                    customerType = CustomerType.ZIPPYYUM;
+        Boolean hasAdmin = SecurityUtils.isInAuthorities(authorities, AuthoritiesConstants.ADMIN);
+        Boolean hasPortal = SecurityUtils.isInAuthorities(authorities, AuthoritiesConstants.PORTAL);
+        Boolean hasInstaller = SecurityUtils.isInAuthorities(authorities, AuthoritiesConstants.INSTALLER);
+
+        if (!hasAdmin) { // we need to set what link to use
+            if (hasPortal) {
+                templateName += "Portal";
+                List<String> sites = userSiteService.getShopsOwnedByUser(user.getLogin());
+                if (sites != null && !sites.isEmpty()) {
+                    if (sites.get(0).contains("SUBW")) {
+                        customerType = CustomerType.ZIPPYYUM;
+                    }
+                } else {
+                    customerType = user.getDefaultPartner();
                 }
-            } else {
-                customerType = user.getDefaultPartner();
+            } else if (hasInstaller) {
+                templateName += "Installer";
             }
         }
 

@@ -1,5 +1,6 @@
 # authenticate
-This application was generated using JHipster 4.14.3, you can find documentation and help at [http://www.jhipster.tech/documentation-archive/v4.14.3](http://www.jhipster.tech/documentation-archive/v4.14.3).
+
+This application was generated using JHipster 5.7.2, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v5.7.2](https://www.jhipster.tech/documentation-archive/v5.7.2).
 
 This is a "uaa" application intended to be part of a microservice architecture, please refer to the [Doing microservices with JHipster][] page of the documentation for more information.
 
@@ -12,17 +13,17 @@ To start your application in the dev profile, simply run:
 
     ./mvnw
 
-
 For further instructions on how to develop with JHipster, have a look at [Using JHipster in development][].
 
+### Doing API-First development using openapi-generator
 
-### Doing API-First development using swagger-codegen
+[OpenAPI-Generator]() is configured for this application. You can generate API code from the `src/main/resources/swagger/api.yml` definition file by running:
 
-[Swagger-Codegen]() is configured for this application. You can generate API code from the `src/main/resources/swagger/api.yml` definition file by running:
 ```bash
 ./mvnw generate-sources
 ```
-Then implements the generated interfaces with `@RestController` classes.
+
+Then implements the generated delegate classes with `@Service` classes.
 
 To edit the `api.yml` definition file, you can use a tool such as [Swagger-Editor](). Start a local instance of the swagger-editor using docker by running: `docker-compose -f src/main/docker/swagger-editor.yml up -d`. The editor will then be reachable at [http://localhost:7742](http://localhost:7742).
 
@@ -38,7 +39,6 @@ To ensure everything worked, run:
 
     java -jar target/*.war
 
-
 Refer to [Using JHipster in production][] for more details.
 
 ## Testing
@@ -46,13 +46,24 @@ Refer to [Using JHipster in production][] for more details.
 To launch your application's tests, run:
 
     ./mvnw clean test
-### Other tests
-
-Performance tests are run by [Gatling][] and written in Scala. They're located in [src/test/gatling](src/test/gatling) and can be run with:
-
-    ./mvnw gatling:execute
 
 For more information, refer to the [Running tests page][].
+
+### Code quality
+
+Sonar is used to analyse code quality. You can start a local Sonar server (accessible on http://localhost:9001) with:
+
+```
+docker-compose -f src/main/docker/sonar.yml up -d
+```
+
+Then, run a Sonar analysis:
+
+```
+./mvnw -Pprod clean test sonar:sonar
+```
+
+For more information, refer to the [Code quality page][].
 
 ## Using Docker to simplify development (optional)
 
@@ -69,7 +80,7 @@ To stop it and remove the container, run:
 You can also fully dockerize your application and all the services that it depends on.
 To achieve this, first build a docker image of your app by running:
 
-    ./mvnw verify -Pprod dockerfile:build
+    ./mvnw package -Pprod verify jib:dockerBuild
 
 Then run:
 
@@ -81,17 +92,18 @@ For more information refer to [Using Docker and Docker-Compose][], this page als
 
 To configure CI for your project, run the ci-cd sub-generator (`jhipster ci-cd`), this will let you generate configuration files for a number of Continuous Integration systems. Consult the [Setting up Continuous Integration][] page for more information.
 
-[JHipster Homepage and latest documentation]: http://www.jhipster.tech
-[JHipster 4.14.3 archive]: http://www.jhipster.tech/documentation-archive/v4.14.3
-[Doing microservices with JHipster]: http://www.jhipster.tech/documentation-archive/v4.14.3/microservices-architecture/
-[Using UAA for Microservice Security]: http://www.jhipster.tech/documentation-archive/v4.14.3/using-uaa/[Using JHipster in development]: http://www.jhipster.tech/documentation-archive/v4.14.3/development/
-[Service Discovery and Configuration with the JHipster-Registry]: http://www.jhipster.tech/documentation-archive/v4.14.3/microservices-architecture/#jhipster-registry
-[Using Docker and Docker-Compose]: http://www.jhipster.tech/documentation-archive/v4.14.3/docker-compose
-[Using JHipster in production]: http://www.jhipster.tech/documentation-archive/v4.14.3/production/
-[Running tests page]: http://www.jhipster.tech/documentation-archive/v4.14.3/running-tests/
-[Setting up Continuous Integration]: http://www.jhipster.tech/documentation-archive/v4.14.3/setting-up-ci/
+[jhipster homepage and latest documentation]: https://www.jhipster.tech
+[jhipster 5.7.2 archive]: https://www.jhipster.tech/documentation-archive/v5.7.2
+[doing microservices with jhipster]: https://www.jhipster.tech/documentation-archive/v5.7.2/microservices-architecture/
 
-[Gatling]: http://gatling.io/
-[Swagger-Codegen]: https://github.com/swagger-api/swagger-codegen
-[Swagger-Editor]: http://editor.swagger.io
-[Doing API-First development]: http://www.jhipster.tech/documentation-archive/v4.14.3/doing-api-first-development/
+[Using UAA for Microservice Security]: https://www.jhipster.tech/documentation-archive/v5.7.2/using-uaa/[Using JHipster in development]: https://www.jhipster.tech/documentation-archive/v5.7.2/development/
+[Service Discovery and Configuration with the JHipster-Registry]: https://www.jhipster.tech/documentation-archive/v5.7.2/microservices-architecture/#jhipster-registry
+[Using Docker and Docker-Compose]: https://www.jhipster.tech/documentation-archive/v5.7.2/docker-compose
+[Using JHipster in production]: https://www.jhipster.tech/documentation-archive/v5.7.2/production/
+[Running tests page]: https://www.jhipster.tech/documentation-archive/v5.7.2/running-tests/
+[Code quality page]: https://www.jhipster.tech/documentation-archive/v5.7.2/code-quality/
+[Setting up Continuous Integration]: https://www.jhipster.tech/documentation-archive/v5.7.2/setting-up-ci/
+
+[openapi-generator]: https://openapi-generator.tech
+[swagger-editor]: http://editor.swagger.io
+[doing api-first development]: https://www.jhipster.tech/documentation-archive/v5.7.2/doing-api-first-development/

@@ -108,11 +108,11 @@ die () {
     exit 1
 }
 
-[ "$#" -eq 1 ] || die "1 argument is required, $# provided, please provide an env. $(highlight 'Usage: ./deploy.sh qa2ms')"
+[ "$#" -eq 1 ] || die "1 argument is required, $# provided, please provide an env. $(highlight 'Usage: ./deploy.sh qa1ms')"
 
-ENV_QA="qa2ms"
+ENV_QA="qa1ms"
 ENV_PROD="prod1ms"
-MYSQL_URL_QA=${LIQUIBASE_URL:-"jdbc:mysql://qa.caolf1xhi8cw.us-west-2.rds.amazonaws.com:3306"}
+MYSQL_URL_QA=${LIQUIBASE_URL:-"jdbc:mysql://qa.cg7hgpcq5pxv.us-west-2.rds.amazonaws.com:3306"}
 MYSQL_URL_PROD=${LIQUIBASE_URL:-"jdbc:mysql://prod.caolf1xhi8cw.us-west-2.rds.amazonaws.com:3306"}
 MYSQL_DB_NAME=${LIQUIBASE_DBNAME:-$(grep -E "url.*mysql" src/main/resources/config/application-prod.yml | sed 's/.*\/\(.*[^?]\)?.*/\1/g')}
 MYSQL_USER="$LIQUIBASE_USERNAME"

@@ -127,7 +127,7 @@ public class UserSiteResource {
 
     @GetMapping("/user-sites-shops/{login}")
     public ResponseEntity<List<String>> getShopsOwnedByUser(@PathVariable String login) {
-        log.debug("REST request to get shops by user ", login);
+        log.debug("REST request to get shops by user : {} ", login);
 
         List<String> sites = userSiteService.getShopsOwnedByUser(login);
 

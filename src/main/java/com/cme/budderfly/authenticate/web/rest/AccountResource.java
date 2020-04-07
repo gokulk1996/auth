@@ -1,7 +1,7 @@
 package com.cme.budderfly.authenticate.web.rest;
 
 import com.cme.budderfly.authenticate.client.SitesClient;
-import com.cme.budderfly.authenticate.service.dto.ContactDTO;
+import com.cme.budderfly.authenticate.service.dto.SiteDTO;
 import com.codahale.metrics.annotation.Timed;
 
 import com.cme.budderfly.authenticate.domain.User;
@@ -103,10 +103,10 @@ public class AccountResource {
         }
 
         try {
-            List<ContactDTO> contacts = sitesClient.getContactsByContainEmail(email);
-            if (contacts == null || contacts.isEmpty()) {
+            List<SiteDTO> sites = sitesClient.getSitesBySiteContacts(email);
+            if (sites == null || sites.isEmpty()) {
                 isValid = false;
-                message = "Email is not listed in the contacts table";
+                message = "Email is not associated with any site";
             }
         } catch ( HystrixRuntimeException e ) {
             isValid = false;

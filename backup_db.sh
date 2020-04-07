@@ -108,11 +108,11 @@ die () {
     exit 1
 }
 
-[ "$#" -eq 1 ] || die "1 argument is required, $# provided, please provide an env. $(highlight 'Usage: ./deploy.sh qa2ms')"
+[ "$#" -eq 1 ] || die "1 argument is required, $# provided, please provide an env. $(highlight 'Usage: ./deploy.sh qa1ms')"
 
-ENV_QA="qa2ms"
+ENV_QA="qa1ms"
 ENV_PROD="prod1ms"
-MYSQL_HOST_QA="qa.caolf1xhi8cw.us-west-2.rds.amazonaws.com"
+MYSQL_HOST_QA="qa.cg7hgpcq5pxv.us-west-2.rds.amazonaws.com"
 MYSQL_HOST_PROD="prod.caolf1xhi8cw.us-west-2.rds.amazonaws.com"
 MYSQL_DB_NAME=$(grep -E "url.*mysql" src/main/resources/config/application-prod.yml | sed 's/.*\/\(.*[^?]\)?.*/\1/g')
 MYSQLDUMP_IGNORE_FLAGS="--ignore-table=$MYSQL_DB_NAME.jhi_entity_audit_event --ignore-table=$MYSQL_DB_NAME.jhi_persistent_audit_event --ignore-table=$MYSQL_DB_NAME.jhi_persistent_audit_evt_data"

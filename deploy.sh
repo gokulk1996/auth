@@ -108,9 +108,9 @@ die () {
     exit 1
 }
  
-[ "$#" -eq 2 ] || die "2 arguments are required, $# provided, please provide an env and version. $(highlight 'Usage: ./deploy.sh qa2ms 1.0.0')"
+[ "$#" -eq 2 ] || die "2 arguments are required, $# provided, please provide an env and version. $(highlight 'Usage: ./deploy.sh qa1ms 1.0.0')"
  
-ENV_QA="qa2ms"
+ENV_QA="qa1ms"
 ENV_PROD="prod1ms"
  
 if [[ "$1" != "$ENV_QA" && "$1" != "$ENV_PROD" ]]; then
@@ -119,8 +119,8 @@ fi
  
 if [[ "$1" = "$ENV_QA" ]]; then
   debug "Tag versions for QA AWS ECR"
-  docker tag authenticate:v$2 181564704724.dkr.ecr.us-west-2.amazonaws.com/qa/authenticate:latest
-  docker tag authenticate:v$2 181564704724.dkr.ecr.us-west-2.amazonaws.com/qa/authenticate:v$2
+  docker tag authenticate:v$2 960527451976.dkr.ecr.us-west-2.amazonaws.com/qa/authenticate:latest
+  docker tag authenticate:v$2 960527451976.dkr.ecr.us-west-2.amazonaws.com/qa/authenticate:v$2
   info "$(docker images | grep $2 | grep amazonaws | grep authenticate | grep qa)"
   info "$(docker images | grep latest | grep amazonaws | grep authenticate | grep qa)"
 fi
@@ -135,14 +135,21 @@ fi
  
 AWS_ECR_DOCKER_IMG_DIGEST=""
 debug "Login to AWS"
+if [[ "$1" = "$ENV_QA" ]]; then
+login=$(aws ecr get-login --no-include-email --region us-west-2 --profile qa)
+fi
+
+if [ "$1" = "$ENV_PROD" ]; then
 login=$(aws ecr get-login --no-include-email --region us-west-2)
+fi
+
 eval $login
  
 if [[ "$1" = "$ENV_QA" ]]; then
   debug "Pushing docker images to QA AWS ECR"
-  docker push 181564704724.dkr.ecr.us-west-2.amazonaws.com/qa/authenticate:latest
-  docker push 181564704724.dkr.ecr.us-west-2.amazonaws.com/qa/authenticate:v$2
-  AWS_ECR_DOCKER_IMG_DIGEST=$(aws ecr describe-images --repository-name qa/authenticate --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageDigest' | tr -d '"')
+  docker push 960527451976.dkr.ecr.us-west-2.amazonaws.com/qa/authenticate:latest
+  docker push 960527451976.dkr.ecr.us-west-2.amazonaws.com/qa/authenticate:v$2
+  AWS_ECR_DOCKER_IMG_DIGEST=$(aws ecr describe-images --repository-name qa/authenticate --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageDigest' --region us-west-2 --profile qa | tr -d '"')
 fi
  
 if [ "$1" = "$ENV_PROD" ]; then

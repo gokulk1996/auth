@@ -15,9 +15,9 @@
 
 logging:
     level:
-        ROOT: INFO
-        com.cme.budderfly.authenticate: INFO
-        io.github.jhipster: INFO
+        ROOT: DEBUG
+        com.cme.budderfly.authenticate: DEBUG
+        io.github.jhipster: DEBUG
 
 eureka:
     instance:
@@ -136,8 +136,8 @@ jhipster:
             client-secret: internal
         authentication:
             jwt:
-                # Access Token is valid for 5 mins
-                token-validity-in-seconds: 300
+                # Access Token is valid for 60 mins
+                token-validity-in-seconds: 3600
                 # Refresh Token is valid for 7 days
                 token-validity-in-seconds-for-remember-me: 252000
     mail: # specific JHipster mail property, for standard properties see MailProperties

@@ -6,6 +6,7 @@ import com.cme.budderfly.authenticate.domain.enumeration.CustomerType;
 import com.cme.budderfly.authenticate.repository.UserRepository;
 import com.cme.budderfly.authenticate.repository.search.UserSearchRepository;
 import com.cme.budderfly.authenticate.security.AuthoritiesConstants;
+import com.cme.budderfly.authenticate.security.SecurityUtils;
 import com.cme.budderfly.authenticate.service.MailService;
 import com.cme.budderfly.authenticate.service.UserService;
 import com.cme.budderfly.authenticate.service.dto.UserDTO;
@@ -21,6 +22,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -112,14 +114,19 @@ public class UserResource {
         } else if (userRepository.findOneByEmailIgnoreCase(userDTO.getEmail()).isPresent()) {
             throw new EmailAlreadyUsedException();
         } else {
-            Boolean onlyPortal = Optional.ofNullable(userDTO.getAuthorities())
-                .map(authentication -> authentication.stream()
-                    .allMatch(grantedAuthority -> grantedAuthority.equals(AuthoritiesConstants.PORTAL))).orElse(false);
+            Boolean hasAdmin = SecurityUtils.isInAuthorities(userDTO.getAuthorities(), AuthoritiesConstants.ADMIN);
+            Boolean hasPortal = SecurityUtils.isInAuthorities(userDTO.getAuthorities(), AuthoritiesConstants.PORTAL);
+            Boolean hasInstaller = SecurityUtils.isInAuthorities(userDTO.getAuthorities(), AuthoritiesConstants.INSTALLER);
 
-            if (onlyPortal) {
-                String domain = (userDTO.getDefaultPartner().equals(CustomerType.ZIPPYYUM)) ? CustomerType.ZIPPYYUM.toLowerCase() : CustomerType.BUDDERFLY.toLowerCase();
-                mailService.sendPortalRegisterationMail(userDTO.getEmail(), domain);
-            } else {
+            if (hasAdmin) { // Send email
+                User newUser = userService.createUser(userDTO);
+                mailService.sendCreationEmail(newUser);
+            } else if (hasPortal) {
+                userService.createUser(userDTO); // just create user
+            } else if (hasInstaller) {
+                userDTO.setDefaultPartner(CustomerType.BUDDERFLY); // forcing BUDDERFLY since installer will never be ZIPPYYUM
+                userService.createUser(userDTO); // just create user
+            } else { // has user role, or other
                 User newUser = userService.createUser(userDTO);
                 mailService.sendCreationEmail(newUser);
             }
@@ -220,9 +227,10 @@ public class UserResource {
      */
     @GetMapping("/_search/users/{query}")
     @Timed
-    public List<User> search(@PathVariable String query) {
-        return StreamSupport
-            .stream(userSearchRepository.search(queryStringQuery(query)).spliterator(), false)
-            .collect(Collectors.toList());
+    public ResponseEntity<List<UserDTO>> search(@PathVariable String query, Pageable pageable) {
+        List<UserDTO> getUserSearch = userService.getUsersByQuery(query, pageable);
+        Page<UserDTO> page = new PageImpl<>(getUserSearch, pageable, getUserSearch.size());
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/_search/users/{query}");
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 }

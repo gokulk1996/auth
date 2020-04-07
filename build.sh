@@ -117,12 +117,12 @@ debug "Building Authenticate App v$1"
  
 debug "Build docker image"
  
-./mvnw clean package -Pprod -DskipTests dockerfile:build
+./mvnw clean package -Pprod -DskipTests jib:dockerBuild
  
 debug "Tag to version v$1"
  
 docker tag authenticate:latest authenticate:v$1
  
 success "Congrats! Docker images are ready to deploy!"
-success "$(highlight "./deploy.sh qa2ms $1") to deploy v$1 into qa2ms"
+success "$(highlight "./deploy.sh qa1ms $1") to deploy v$1 into qa1ms"
 success "$(highlight "./deploy.sh prod1ms $1") to deploy v$1 into prod1ms"
